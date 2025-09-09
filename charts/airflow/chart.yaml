@@ -1,0 +1,12 @@
+apiVersion: v2
+name: airflow
+description: "Wrapper Helm chart to deploy Apache Airflow with repo-managed values"
+type: application
+version: 0.1.0
+appVersion: "2.9.2"
+
+# Depend on upstream apache/airflow chart
+dependencies:
+  - name: airflow
+    version: "1.15.0"            # choose the chart version you want
+    repository: "https://airflow.apache.org"
