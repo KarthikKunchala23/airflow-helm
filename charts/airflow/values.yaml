@@ -16,7 +16,7 @@ serviceAccount:
   name: "airflow"
   annotations:
     # Set this to the actual IRSA role ARN for airflow service account
-    eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<AIRFLOW_IRSA_ROLE_NAME>"
+    eks.amazonaws.com/role-arn: "arn:aws:iam::897722700244:role/platform-org-dev-airflow-role"
 
 # Webserver
 webserver:
@@ -40,19 +40,27 @@ postgresql:
 dags:
   gitSync:
     enabled: true
-    repo: "https://github.com/<YOUR_ORG>/<DAGS_REPO>.git"
+    repo: "https://github.com/KarthikKunchala23/data-platform-dags.git"
     branch: main
     subPath: "dags"
     depth: 1
     syncWait: 60
     # if your dags repo is private supply a Kubernetes secret name
-    credentialsSecret: "git-credentials"   # create this secret in 'airflow' namespace
+    # credentialsSecret: "git-credentials"   # create this secret in 'airflow' namespace
 
 # Remote logging to S3
+
+connections:
+  - conn_id: S3_LOGS
+    conn_type: aws
+    extra: |
+      {"region_name": "us-east-1"}
+      
 logs:
   remoteLogging: true
   remoteLogConnId: "S3_LOGS"  # Airflow connection id name; define connection in Airflow (via ExternalSecrets/secrets)
-  remoteBaseLogFolder: "s3://<S3_BUCKET>/airflow-logs"
+  remoteBaseLogFolder: "s3://yourorg-data-dev-airflow-logs/airflow-logs"
+
 
 # RBAC
 rbac:
