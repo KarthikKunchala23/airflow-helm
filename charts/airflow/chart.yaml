@@ -10,3 +10,4 @@ dependencies:
   - name: airflow
     version: "1.15.0"            # choose the chart version you want
     repository: "https://airflow.apache.org"
+    alias: apache-airflow       # alias to avoid name conflict with this chart
