@@ -1,43 +1,44 @@
-# charts/airflow/values.yaml
-
-
 executor: "KubernetesExecutor"
 
-# Image: either use apache/airflow from Docker Hub or your ECR image
 images:
   airflow:
-    # Use public image (default) OR set ecr image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/airflow-platform:TAG
-    repository: "apache/airflow"     # change to your ECR repo if you push custom image
+    repository: "apache/airflow"
     tag: "2.9.2"
 
-# ServiceAccount for IRSA: annotate with the IAM role ARN created by your Terraform iam_irsa module
 serviceAccount:
   create: true
   name: "airflow"
   annotations:
-    # Set this to the actual IRSA role ARN for airflow service account
-    eks.amazonaws.com/role-arn: "arn:aws:iam::897722700244:role/platform-org-dev-airflow-role"
+    eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<AIRFLOW_IRSA_ROLE_NAME>"
 
-# Webserver
 webserver:
   replicas: 2
   service:
     type: LoadBalancer
     port: 8080
 
-# Scheduler
 scheduler:
   replicas: 2
 
-# Postgres: for prod you probably want external RDS. For dev you can enable bundled Postgres
+#  Disable bundled Postgres (we use RDS instead)
 postgresql:
-  enabled: true
-  postgresqlDatabase: "airflow"
-  postgresqlUsername: "airflow"
-  postgresqlPassword: "airflowpass123" # use ExternalSecrets in prod
+  enabled: false
 
-# DAGs: git-sync configuration
+extraEnvFrom:
+  - secretRef:
+      name: airflow-db-secret
+
+#  PVCs for logs/DAGs
+logs:
+  remoteLogging: true
+  remoteLogConnId: "S3_LOGS"
+  remoteBaseLogFolder: "s3://yourorg-data-dev-airflow-logs/airflow-logs"
+
 dags:
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClassName: gp2
   gitSync:
     enabled: true
     repo: "https://github.com/KarthikKunchala23/data-platform-dags.git"
@@ -45,28 +46,10 @@ dags:
     subPath: "dags"
     depth: 1
     syncWait: 60
-    # if your dags repo is private supply a Kubernetes secret name
-    # credentialsSecret: "git-credentials"   # create this secret in 'airflow' namespace
 
-# Remote logging to S3
-
-connections:
-  - conn_id: S3_LOGS
-    conn_type: aws
-    extra: |
-      {"region_name": "us-east-1"}
-      
-logs:
-  remoteLogging: true
-  remoteLogConnId: "S3_LOGS"  # Airflow connection id name; define connection in Airflow (via ExternalSecrets/secrets)
-  remoteBaseLogFolder: "s3://yourorg-data-dev-airflow-logs/airflow-logs"
-
-
-# RBAC
 rbac:
   create: true
 
-# affinity/anti-affinity example for reliability
 affinity:
   podAntiAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
