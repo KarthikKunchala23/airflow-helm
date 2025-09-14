@@ -24,6 +24,16 @@ scheduler:
 postgresql:
   enabled: false
 
+# Reference external RDS
+externalDatabase:
+  type: postgres
+  host: platform-org-dev-airflow-db.c41ka4qya7i2.us-east-1.rds.amazonaws.com
+  port: 5432
+  database: airflow
+  user: airflow
+  passwordSecret: airflow-db-secret
+  passwordSecretKey: AIRFLOW_DB_PASSWORD
+
 extraEnvFrom:
   - secretRef:
       name: airflow-db-secret
