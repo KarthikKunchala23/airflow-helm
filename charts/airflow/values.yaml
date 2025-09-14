@@ -9,7 +9,7 @@ serviceAccount:
   create: true
   name: "airflow"
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<AIRFLOW_IRSA_ROLE_NAME>"
+    eks.amazonaws.com/role-arn: "arn:aws:iam::897722700244:role/platform-org-dev-airflow-role"
 
 webserver:
   replicas: 2
