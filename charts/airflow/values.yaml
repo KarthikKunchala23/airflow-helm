@@ -32,9 +32,13 @@ scheduler:
 # Postgres: for prod you probably want external RDS. For dev you can enable bundled Postgres
 postgresql:
   enabled: true
-  postgresqlDatabase: "airflow"
-  postgresqlUsername: "airflow"
-  postgresqlPassword: "airflowpass123" # use ExternalSecrets in prod
+  primary:
+    persistence:
+      enabled: false
+  auth:
+    username: "airflow"
+    password: "airflowpass123"
+    database: "airflow" # use ExternalSecrets in prod
 
 # DAGs: git-sync configuration
 dags:
